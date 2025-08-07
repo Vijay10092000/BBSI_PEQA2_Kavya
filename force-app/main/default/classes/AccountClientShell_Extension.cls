@@ -271,14 +271,12 @@ public without sharing class AccountClientShell_Extension {
 			}
 
 			String text = String.format(OPPORTUNITY_IS_INCOMPLETE, new List<String>{ message, workOpp.Id });
-			System.debug('Apex pages Message text :'+text);
 			ApexPages.addMessage(
 				new ApexPages.Message(
 					ApexPages.Severity.ERROR, 
 					text
 				)
 			);
-			System.debug('Apex pages Message :'+ApexPages.getMessages());
 			pageRef = null;
 		}
 

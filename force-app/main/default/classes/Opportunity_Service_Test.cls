@@ -94,7 +94,7 @@ public without sharing class Opportunity_Service_Test {
 	public static void test_updateFieldsFromLeadClient() {
 		loadData();
 
-		
+		System.debug('test_updateFieldsFromLeadClient');		
 		Test.startTest();
 		Database.LeadConvertResult resultWith = LeadConvert.convert(leadWithEstimate.Id, true);
         Test.stopTest();
@@ -314,6 +314,7 @@ public without sharing class Opportunity_Service_Test {
     
      @IsTest
     	public static void test_callPricingEngineWebhook(){
+            Test.startTest();
         Account acc = TestFactoryAccount.makeClient('!!!BBSI TEST CLIENT', null, null);
         acc.External_Id__c = 'TEST';
         insert acc;
@@ -336,7 +337,6 @@ public without sharing class Opportunity_Service_Test {
         String res = '"message": "Xmods Updated Successfully"';
         Map<String,String> headers = new Map<String,String>();
         headers.put('Content-Type', 'application/xml; charset=UTF-8');
-        Test.startTest();
         Test.setMock(HttpCalloutMock.class, new GenericMockCallout(200, 'OK', res, headers));
         update newOpp; // Simulate trigger behavior
         Test.stopTest();

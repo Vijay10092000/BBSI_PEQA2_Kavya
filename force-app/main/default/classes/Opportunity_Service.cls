@@ -416,8 +416,7 @@ public without sharing class Opportunity_Service {
         Date closeDate = OpportunityClient.getCloseDate();
         
         for (Opportunity opp : opps) {
-            if (opp.RecordTypeId == idrtClient && (opp.Renewal_Date__c == null || opp.Renewal_Date__c <= System.today())) { //User Story: 69850, Test Case: 70968
-
+            if (opp.RecordTypeId == idrtClient) {
                 opp.CloseDate = closeDate;
             }
         }
@@ -509,4 +508,26 @@ public without sharing class Opportunity_Service {
 			}
 		}
 	}
+
+
+    /**
+     * Creates a Contracts folder and web link for the specified Opportunity.
+     * This method is responsible for initiating the folder creation process and web link generation
+     * for the Contracts associated with the given Opportunity.
+     *
+     * @param newOpps old opportunities
+     * @param oldOpps new opportunities
+     */
+    public static void createContractsFolderAndWeblink(Map<Id,Opportunity> oldOpps, List<Opportunity> newOpps){
+        Set<Id> newOppIds = new Set<Id>();
+        for(Opportunity opp:newOpps){
+            if(String.isNotBlank(opp.AccountId)){
+	            newOppIds.add(opp.Id);                
+            }
+        }
+        if(!newOppIds.isEmpty()){
+            //enqueue the job to create folder for new opportunity and create weblink with contracts accounts subfolder
+            System.enqueueJob(new ContractsBoxFolderServiceQueue(newOppIds));
+        }
+    }
 }

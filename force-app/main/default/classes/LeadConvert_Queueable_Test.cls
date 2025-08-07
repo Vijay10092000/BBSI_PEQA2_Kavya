@@ -8,6 +8,9 @@ public without sharing class LeadConvert_Queueable_Test {
 	 */
 	@IsTest
 	public static void test_convert() {
+        Box_Contracts_Folder__c contractsFolder = new Box_Contracts_Folder__c(FolderId__c='1234567890',Folder_Name__c='Contracts');
+        insert contractsFolder;
+        
 		Account branch = TestFactoryAccount.createBranch('TEST BRANCH');
 		Lead lead1 = TestFactoryLead.makeClientLead('TEST', 'LEAD1', 'One', branch.Id, null);
 		Lead lead2 = TestFactoryLead.makeClientLead('TEST', 'LEAD2', 'Two', branch.Id, null);

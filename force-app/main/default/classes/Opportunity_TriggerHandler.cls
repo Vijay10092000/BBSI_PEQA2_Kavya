@@ -39,6 +39,11 @@ public without sharing class Opportunity_TriggerHandler extends TriggerHandlerIn
 		Opportunity_Service.sendEmailOpportunityClosed(null, mapNewOpps);
 
 		(new OpportunityProducts_Handler(null, mapNewOpps.values())).afterInsert();
+
+		//Five9ListAssignment.updatePipelineStatus(null, mapNewOpps);
+
+		//to create weblink in for new opportunity -- story 82491
+        Opportunity_Service.createContractsFolderAndWeblink(null, mapNewOpps.values());
 	}
 
 	/**
@@ -72,5 +77,7 @@ public without sharing class Opportunity_TriggerHandler extends TriggerHandlerIn
 		Opportunity_Service.callPricingEngineWebhook(mapOldOpps, mapNewOpps);		// call Webhook to update states in Pricing Engine
 
 		(new OpportunityProducts_Handler(mapOldOpps, mapNewOpps.values())).afterUpdate();
+
+		//Five9ListAssignment.updatePipelineStatus(null, mapNewOpps);
 	}
 }
