@@ -508,9 +508,9 @@ public without sharing class Opportunity_Service {
 			}
 		}
 	}
-
-
-    /**
+    
+    
+     /**
      * Creates a Contracts folder and web link for the specified Opportunity.
      * This method is responsible for initiating the folder creation process and web link generation
      * for the Contracts associated with the given Opportunity.
@@ -526,8 +526,27 @@ public without sharing class Opportunity_Service {
             }
         }
         if(!newOppIds.isEmpty()){
-            //enqueue the job to create folder for new opportunity and create weblink with contracts accounts subfolder
-            System.enqueueJob(new ContractsBoxFolderServiceQueue(newOppIds));
+            if(Limits.getQueueableJobs() < 1){
+                //enqueue the job to create folder for new opportunity and create weblink with contracts accounts subfolder
+            	System.enqueueJob(new ContractsBoxFolderServiceQueue(newOppIds));
+            }else{
+                futureContractsBoxFolderServiceQueue(newOppIds);
+            }
+            
         }
+    }
+    
+    
+    /**
+     * @description Future method serves as an alternative execution path when queueable job limits are reached
+     * It directly calls the ContractsBoxFolderServiceQueue's execute method to create folders
+     * for new opportunities and create weblinks with contracts accounts subfolders in new Opportunity folders
+     * 
+     * @param newOppIds Set of Opportunity Ids that need to be processed
+     */
+    @future
+    public static void futureContractsBoxFolderServiceQueue(Set<Id> newOppIds) {
+        ContractsBoxFolderServiceQueue queue = new ContractsBoxFolderServiceQueue(newOppIds);
+        queue.execute(null);
     }
 }

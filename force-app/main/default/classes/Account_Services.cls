@@ -340,7 +340,7 @@ public without sharing class Account_Services {
 
 		if (!idBranches.isEmpty()) {
 			Map<Id, Account> mapBranches = new Map<id, Account>([
-				SELECT Id, Name, Benefits_Consultant__c
+				SELECT Id, Name, Benefits_Consultant__c, Benefits_Representative__c
 				FROM Account
 				WHERE Id IN :idBranches
 			]);
@@ -645,7 +645,7 @@ public without sharing class Account_Services {
 		return new Map<Id,Account> ([
 			SELECT Id, Name, Active_Employees_All_Affiliates__c, Active_Employees_Full_Time__c, Active_Employees_Part_Time__c, Assigned_Referral_Partner__c, 
 			Commission_Rate__c, BBSI_Benefits__c, BBSI_Benefits_Renewal_Date__c, Benefits__c, Benefits_Affiliated_Companies__c, Benefits_Affiliates__c, 
-			Benefits_Affiliates_Type__c, Benefits_Consultant__c, Benefits_Type__c, Client__c, Client_Benefits__c, Client_Benefits_Renewal_Month__c, 
+			Benefits_Affiliates_Type__c, Benefits_Consultant__c, Benefits_Type__c, Client__c, Client_Benefits__c, Client_Benefits_Renewal_Month__c, Benefits_Representative__c,
 			Commission_Type__c, CreatedDate, External_Id__c, Full_Time_Employees_All_Affiliates__c, Headquarters_State__c, Hold__c, Hold_Effective_Date__c, 
 			Is_Benefits_Renewal_Opp_Generated__c, Is_there_a_benefits_referral_partner__c, Life_Health_Commission_Rate__c, Life_Health_Commission_Type__c , 
 			NumberOfEmployees, OwnerId, Part_Time_Employees_All_Affiliates__c, Producer__c, Producer_for_Benefits__c, Prospect_Branch__c, RecordType.Name, 
@@ -759,8 +759,31 @@ public without sharing class Account_Services {
             }
         }
         if(!externalIdChangedAccounts.isEmpty() || !contractsFolderChangedAccounts.isEmpty()){
-            //enqueue the job to udpate folder metadata, tags and to create a weblink(Contracts folder shared link as weblink) in opportunity folder
-            System.enqueueJob(new ContractsBoxFolderServiceQueue(externalIdChangedAccounts,contractsFolderChangedAccounts));
+            
+            if (Limits.getQueueableJobs() < 1) {
+                //enqueue the job to udpate folder metadata, tags and to create a weblink(Contracts folder shared link as weblink) in opportunity folder
+                System.enqueueJob(new ContractsBoxFolderServiceQueue(externalIdChangedAccounts, contractsFolderChangedAccounts));
+            }
+            else {
+                futureContractsBoxFolderServiceQueue(externalIdChangedAccounts, contractsFolderChangedAccounts);
+            }
         }
+    }
+
+
+	/**
+	 * @description Future method that processes Box contracts folder operations for accounts when queueable limits are reached
+	 * This method provides an asynchronous alternative to the queueable implementation
+	 * It handles account updates where External_ID__c or Contracts_Accounts_SubFolder_Id__c fields have changed
+	 * Directly calls the ContractsBoxFolderServiceQueue's execute method to update folder metadata, tags, 
+	 * and create weblinks in the associated opportunity folders
+	 * 
+	 * @param externalIdChangedAccountIds Set of Account Ids that have had their External_ID__c field changed
+	 * @param contractsFolderChangedAccountIds Set of Account Ids that have had their Contracts_Accounts_SubFolder_Id__c field changed
+	 */
+	@future(callout=true)
+    public static void futureContractsBoxFolderServiceQueue(Set<Id> externalIdChangedAccounts, Set<Id> contractsFolderChangedAccounts) {
+        ContractsBoxFolderServiceQueue queue = new ContractsBoxFolderServiceQueue(externalIdChangedAccounts, contractsFolderChangedAccounts);
+        queue.execute(null);
     }
 }
